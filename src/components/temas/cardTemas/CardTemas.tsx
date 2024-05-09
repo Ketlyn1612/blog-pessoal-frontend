@@ -1,67 +1,26 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Dna } from 'react-loader-spinner';
-import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../../contexts/AuthContext';
-import Tema from '../../../models/Tema';
-import { buscar } from '../../../services/Service';
-import CardTemas from '../cardTemas/CardTemas';
+import React from 'react'
+import { Link } from 'react-router-dom'
+import Tema from '../../../models/Tema'
 
-function ListaTemas() {
-  const [temas, setTemas] = useState<Tema[]>([]);
-
-  let navigate = useNavigate();
-
-  const { usuario, handleLogout } = useContext(AuthContext);
-  const token = usuario.token;
-
-  async function buscarTemas() {
-    try {
-      await buscar('/temas', setTemas, {
-        headers: { Authorization: token },
-      });
-    } catch (error: any) {
-      if (error.toString().includes('403')) {
-        alert('O token expirou, favor logar novamente')
-        handleLogout()
-      }
-    }
-  }
-
-  useEffect(() => {
-    if (token === '') {
-      alert('Você precisa estar logado');
-      navigate('/login');
-    }
-  }, [token]);
-
-  useEffect(() => {
-    buscarTemas();
-  }, [temas.length]);
-  return (
-    <>
-      {temas.length === 0 && (
-        <Dna
-          visible={true}
-          height="200"
-          width="200"
-          ariaLabel="dna-loading"
-          wrapperStyle={{}}
-          wrapperClass="dna-wrapper mx-auto"
-        />
-      )}
-      <div className="flex justify-center w-full my-4">
-        <div className="container flex flex-col">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {temas.map((tema) => (
-              <>
-                <CardTemas key={tema.id} tema={tema} />
-              </>
-            ))}
-          </div>
-        </div>
-      </div>
-    </>
-  );
+interface CardTemaProps {
+  tema: Tema
 }
 
-export default ListaTemas;
+function CardTemas({tema}: CardTemaProps) {
+  return (
+    <div className='border flex flex-col rounded-2xl overflow-hidden justify-between'>
+      <header className='py-2 px-6 bg-indigo-800 text-white font-bold text-2xl'>Tema</header>
+      <p className='p-8 text-3xl bg-slate-200 h-full'>{tema.descricao}</p>
+      <div className="flex">
+        <Link to={`/editarTema/${tema.id}`} className='w-full text-slate-100 bg-indigo-400 hover:bg-indigo-800 flex items-center justify-center py-2'>
+          <button>Editar</button>
+        </Link>
+        <Link to={`/deletarTema/${tema.id}`} className='text-slate-100 bg-red-400 hover:bg-red-700 w-full flex items-center justify-center'>
+          <button>Deletar</button>
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+export default CardTemas
